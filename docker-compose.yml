@@ -1,0 +1,53 @@
+services:
+  kestra:
+    image: kestra/kestra:latest
+    container_name: kestra
+    restart: unless-stopped
+    command: server standalone
+    ports:
+      - "8083:8080"
+    environment:
+      KESTRA_CONFIGURATION: |
+        kestra:
+          server:
+            url: "https://kestra.domoro.rechl.dev"
+          repository:
+            type: postgres
+          queue:
+            type: postgres
+          storage:
+            type: local
+            local:
+              basePath: "/app/storage"
+          tasks:
+            tmpDir: "/app/tmp"
+        datasources:
+          default:
+            url: "jdbc:postgresql://postgres:5432/kestra"
+            driverClassName: "org.postgresql.Driver"
+            username: "kestra"
+            password: "kestra"
+        micronaut:
+          server:
+            port: 8080
+    volumes:
+      - kestra_data:/app/storage
+      - kestra_tmp:/app/tmp
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: kestra-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kestra
+      POSTGRES_USER: kestra
+      POSTGRES_PASSWORD: kestra
+    volumes:
+      - kestra_db:/var/lib/postgresql/data
+
+volumes:
+  kestra_db:
+  kestra_data:
+  kestra_tmp:
