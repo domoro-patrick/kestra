@@ -6,6 +6,8 @@ services:
     command: server standalone
     ports:
       - "8083:8080"
+    env_file:
+      - ./.env
     environment:
       KESTRA_CONFIGURATION: |
         kestra:
